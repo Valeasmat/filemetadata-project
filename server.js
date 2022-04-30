@@ -1,5 +1,8 @@
 var express = require('express');
 var cors = require('cors');
+const multer  = require('multer')
+const storage = multer.memoryStorage()
+const upload = multer({ storage: storage })
 require('dotenv').config()
 
 var app = express();
@@ -7,8 +10,23 @@ var app = express();
 app.use(cors());
 app.use('/public', express.static(process.cwd() + '/public'));
 
+app.use('/',function(req, res, next) {
+  let log=`${req.method} ${req.path} - ${req.ip}`
+  console.log(log);
+  next();
+})
 app.get('/', function (req, res) {
     res.sendFile(process.cwd() + '/views/index.html');
+});
+
+app.post('/api/fileanalyse',upload.single("upfile"), function (req, res) {
+    console.log(req.file)
+    let metadata={
+      name:req.file.originalname,
+      type:req.file.mimetype,
+      size:req.file.size
+    }
+    res.json(metadata);
 });
 
 
